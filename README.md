@@ -15,7 +15,7 @@ $$
 trace powers detect weighted closed walks:
 
 $$
-h_k(P)=\operatorname{tr}(P^k)-b_k.
+h_k(P)=\mathrm{tr}(P^k)-b_k.
 $$
 
 For Hamiltonian-cycle constraints we use

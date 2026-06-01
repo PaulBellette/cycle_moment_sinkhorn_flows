@@ -5,7 +5,7 @@
 We sketch a geometric flow on the positive interior of the Birkhoff polytope motivated by the traveling salesperson problem, Brockett's double-bracket flow, and modern Sinkhorn/mirror-descent methods. The central object is a KL-gradient flow over doubly stochastic matrices augmented by trace-power constraints of the form
 
 $$
-h_k(P)=\operatorname{tr}(P^k)-b_k.
+h_k(P)=\mathrm{tr}(P^k)-b_k.
 $$
 
 For TSP-like routing, these trace moments distinguish single Hamiltonian cycles from subtour decompositions. The resulting system is not proposed primarily as a competitive TSP solver, but as a mathematical object: a transport-polytope analogue of Brockett-style constrained matrix flows. We discuss its constrained geometry, primal-dual and augmented variants, local linearisation, Lyapunov structure, damping of trace-violating modes, degeneracy near the uniform doubly stochastic matrix, and reduced-cost stability near permutation vertices.
@@ -45,13 +45,13 @@ $$
 Let $C\in \mathbb R^{n\times n}$ be an edge-cost matrix. The linear assignment/TSP-like cost is
 
 $$
-\langle C,P\rangle=\operatorname{tr}(C^\top P).
+\langle C,P\rangle=\mathrm{tr}(C^\top P).
 $$
 
 Define trace-moment constraints
 
 $$
-h_k(P)=\operatorname{tr}(P^k)-b_k.
+h_k(P)=\mathrm{tr}(P^k)-b_k.
 $$
 
 For a single directed Hamiltonian cycle, a natural target is
@@ -66,30 +66,30 @@ $$
 b_n=n.
 $$
 
-The constraints $\operatorname{tr}(P^k)=0$ for $k<n$ suppress shorter closed cycles, while $\operatorname{tr}(P^n)=n$ is consistent with a single $n$-cycle permutation.
+The constraints $\mathrm{tr}(P^k)=0$ for $k<n$ suppress shorter closed cycles, while $\mathrm{tr}(P^n)=n$ is consistent with a single $n$-cycle permutation.
 
 ### Lemma: trace moments characterise Hamiltonian cycles
 
 Let $P\in\mathcal B_n$. Then $P$ is the permutation matrix of a single directed $n$-cycle if and only if
 
 $$
-\operatorname{tr}(P^k)=0,\qquad k=1,\dots,n-1.
+\mathrm{tr}(P^k)=0,\qquad k=1,\dots,n-1.
 $$
 
-In that case, automatically $\operatorname{tr}(P^n)=n$.
+In that case, automatically $\mathrm{tr}(P^n)=n$.
 
-Proof. If $P$ is a single $n$-cycle permutation matrix, then $P^k$ has no fixed points for $1\le k<n$. Hence $\operatorname{tr}(P^k)=0$.
+Proof. If $P$ is a single $n$-cycle permutation matrix, then $P^k$ has no fixed points for $1\le k<n$. Hence $\mathrm{tr}(P^k)=0$.
 
-Conversely, suppose $P\in\mathcal B_n$ and $\operatorname{tr}(P^k)=0$ for $1\le k<n$. Since $P\ge0$,
+Conversely, suppose $P\in\mathcal B_n$ and $\mathrm{tr}(P^k)=0$ for $1\le k<n$. Since $P\ge0$,
 
 $$
-\operatorname{tr}(P^k)
+\mathrm{tr}(P^k)
 =
 \sum_{i_1,\dots,i_k}
 P_{i_1i_2}P_{i_2i_3}\cdots P_{i_ki_1}.
 $$
 
-Every term is nonnegative. Therefore $\operatorname{tr}(P^k)=0$ implies there is no positive-weight closed walk of length $k$.
+Every term is nonnegative. Therefore $\mathrm{tr}(P^k)=0$ implies there is no positive-weight closed walk of length $k$.
 
 By the Birkhoff-von Neumann theorem,
 
@@ -100,7 +100,7 @@ P=\sum_\ell \alpha_\ell \Pi_\ell,
 \sum_\ell\alpha_\ell=1,
 $$
 
-where each $\Pi_\ell$ is a permutation matrix. If any $\Pi_\ell$ contained a cycle of length $m<n$, then that cycle would give a positive term in $\operatorname{tr}(P^m)$, contradiction. Hence each $\Pi_\ell$ is a single $n$-cycle.
+where each $\Pi_\ell$ is a permutation matrix. If any $\Pi_\ell$ contained a cycle of length $m<n$, then that cycle would give a positive term in $\mathrm{tr}(P^m)$, contradiction. Hence each $\Pi_\ell$ is a single $n$-cycle.
 
 It remains to show that all $\Pi_\ell$ are the same $n$-cycle. Suppose two distinct $n$-cycles occur in the decomposition. Relabel the vertices so that one of them is
 
@@ -108,9 +108,9 @@ $$
 1\to2\to\cdots\to n\to1.
 $$
 
-The other cycle has some edge $i\to j$ with $j\ne i+1$ modulo $n$. Combining this edge with the path in the first cycle from $j$ back to $i$ gives a directed cycle of length strictly less than $n$ in the support of $P$. This would again make $\operatorname{tr}(P^m)>0$ for some $m<n$, contradiction.
+The other cycle has some edge $i\to j$ with $j\ne i+1$ modulo $n$. Combining this edge with the path in the first cycle from $j$ back to $i$ gives a directed cycle of length strictly less than $n$ in the support of $P$. This would again make $\mathrm{tr}(P^m)>0$ for some $m<n$, contradiction.
 
-Therefore all permutation matrices in the Birkhoff decomposition are the same $n$-cycle, and $P$ equals that permutation matrix. Finally, for an $n$-cycle permutation, $P^n=I$, so $\operatorname{tr}(P^n)=n$.
+Therefore all permutation matrices in the Birkhoff decomposition are the same $n$-cycle, and $P$ equals that permutation matrix. Finally, for an $n$-cycle permutation, $P^n=I$, so $\mathrm{tr}(P^n)=n$.
 
 ### Remark: why Birkhoff rather than orthogonal?
 
@@ -362,7 +362,7 @@ $$
 The primal-dual mirror flow is
 
 $$
-\dot P=-\operatorname{grad}^{\mathrm{KL}}_{\mathcal B}\mathcal L(P,\lambda),
+\dot P=-\mathrm{grad}^{\mathrm{KL}}_{\mathcal B}\mathcal L(P,\lambda),
 $$
 
 $$
@@ -390,7 +390,7 @@ $$
 with
 
 $$
-\dot P=-\operatorname{grad}^{\mathrm{KL}}_{\mathcal B}\mathcal L_\rho(P,\lambda),
+\dot P=-\mathrm{grad}^{\mathrm{KL}}_{\mathcal B}\mathcal L_\rho(P,\lambda),
 $$
 
 $$
@@ -444,14 +444,14 @@ Thus the pure primal-dual model has undamped trace-control modes, while the augm
 The first derivative of the trace moments is
 
 $$
-D\operatorname{tr}(P^k)[\delta P]
-=k\operatorname{tr}(P^{k-1}\delta P).
+D\mathrm{tr}(P^k)[\delta P]
+=k\mathrm{tr}(P^{k-1}\delta P).
 $$
 
 Equivalently,
 
 $$
-\nabla_P \operatorname{tr}(P^k)=k(P^{k-1})^\top.
+\nabla_P \mathrm{tr}(P^k)=k(P^{k-1})^\top.
 $$
 
 Let
@@ -463,22 +463,22 @@ $$
 be the trace-constraint Jacobian, with rows
 
 $$
-A_k[\delta P]=k\operatorname{tr}(P^{k-1}\delta P).
+A_k[\delta P]=k\mathrm{tr}(P^{k-1}\delta P).
 $$
 
 The second variation is
 
 $$
-D^2\operatorname{tr}(P^k)[\delta P,\delta P]
+D^2\mathrm{tr}(P^k)[\delta P,\delta P]
 =
-k\sum_{r=0}^{k-2}\operatorname{tr}\left(P^r\delta P P^{k-2-r}\delta P\right).
+k\sum_{r=0}^{k-2}\mathrm{tr}\left(P^r\delta P P^{k-2-r}\delta P\right).
 $$
 
 Thus the local curvature of the trace-constrained Lagrangian is generated entirely by the trace-moment terms; the cost $\langle C,P\rangle$ is linear and contributes no Hessian.
 
 ### Proof
 
-Let $f_k(P)=\operatorname{tr}(P^k)$. Expanding to first order,
+Let $f_k(P)=\mathrm{tr}(P^k)$. Expanding to first order,
 
 $$
 (P+\epsilon \delta P)^k
@@ -493,13 +493,13 @@ $$
 Taking traces gives
 
 $$
-\operatorname{tr}\left((P+\epsilon\delta P)^k\right)
+\mathrm{tr}\left((P+\epsilon\delta P)^k\right)
 =
-\operatorname{tr}(P^k)
+\mathrm{tr}(P^k)
 +
 \epsilon
 \sum_{r=0}^{k-1}
-\operatorname{tr}(P^r\delta P P^{k-1-r})
+\mathrm{tr}(P^r\delta P P^{k-1-r})
 +
 O(\epsilon^2).
 $$
@@ -507,9 +507,9 @@ $$
 By cyclicity of trace,
 
 $$
-\operatorname{tr}(P^r\delta P P^{k-1-r})
+\mathrm{tr}(P^r\delta P P^{k-1-r})
 =
-\operatorname{tr}(P^{k-1}\delta P).
+\mathrm{tr}(P^{k-1}\delta P).
 $$
 
 Thus
@@ -517,11 +517,11 @@ Thus
 $$
 Df_k(P)[\delta P]
 =
-k\operatorname{tr}(P^{k-1}\delta P).
+k\mathrm{tr}(P^{k-1}\delta P).
 $$
 
 Using the Euclidean matrix inner product
-$\langle A,B\rangle=\operatorname{tr}(A^\top B)$, this implies
+$\langle A,B\rangle=\mathrm{tr}(A^\top B)$, this implies
 
 $$
 \nabla_P f_k(P)=k(P^{k-1})^\top.
@@ -541,7 +541,7 @@ $$
 D^2 f_k(P)[\delta P,\delta P]
 =
 k\sum_{r=0}^{k-2}
-\operatorname{tr}\left(
+\mathrm{tr}\left(
 P^r\delta P P^{k-2-r}\delta P
 \right).
 $$
@@ -559,14 +559,14 @@ $$
 and the KL-gradient flow
 
 $$
-\dot P=-\operatorname{grad}^{\mathrm{KL}}_{\mathcal B}E_\rho(P),
+\dot P=-\mathrm{grad}^{\mathrm{KL}}_{\mathcal B}E_\rho(P),
 $$
 
 we expect the dissipation identity
 
 $$
 \frac{dE_\rho}{dt}
-=-\left\|\operatorname{grad}^{\mathrm{KL}}_{\mathcal B}E_\rho(P)\right\|^2_{\mathrm{KL}}
+=-\left\|\mathrm{grad}^{\mathrm{KL}}_{\mathcal B}E_\rho(P)\right\|^2_{\mathrm{KL}}
 \le 0.
 $$
 
@@ -579,7 +579,7 @@ The pure primal-dual system, by contrast, has saddle-like structure and can exhi
 Let $E(P)$ be any smooth energy and let
 
 $$
-W=\operatorname{grad}^{\mathrm{KL}}_{\mathcal B}E(P).
+W=\mathrm{grad}^{\mathrm{KL}}_{\mathcal B}E(P).
 $$
 
 The KL-gradient flow is
@@ -915,8 +915,8 @@ $$
 For $k\ge 2$, the trace derivative along a Birkhoff tangent perturbation $\delta P$ is
 
 $$
-D\operatorname{tr}(P^k)[\delta P]
-=k\operatorname{tr}(P_0\delta P)
+D\mathrm{tr}(P^k)[\delta P]
+=k\mathrm{tr}(P_0\delta P)
 =\frac{k}{n}\sum_{ij}\delta P_{ij}.
 $$
 
@@ -929,7 +929,7 @@ $$
 Therefore
 
 $$
-D\operatorname{tr}(P^k)[\delta P]=0,
+D\mathrm{tr}(P^k)[\delta P]=0,
 \qquad k\ge 2.
 $$
 
@@ -956,25 +956,25 @@ $$
 Then for every $k\ge2$,
 
 $$
-D\operatorname{tr}(P^k)\big|_{P=P_0}[\delta P]=0.
+D\mathrm{tr}(P^k)\big|_{P=P_0}[\delta P]=0.
 $$
 
 Proof. Since $P_0^m=P_0$ for every $m\ge1$, the trace derivative gives
 
 $$
-D\operatorname{tr}(P^k)\big|_{P=P_0}[\delta P]
+D\mathrm{tr}(P^k)\big|_{P=P_0}[\delta P]
 =
-k\operatorname{tr}(P_0^{k-1}\delta P)
+k\mathrm{tr}(P_0^{k-1}\delta P)
 =
-k\operatorname{tr}(P_0\delta P).
+k\mathrm{tr}(P_0\delta P).
 $$
 
 Using $P_0=(1/n)\mathbf 1\mathbf 1^\top$,
 
 $$
-\operatorname{tr}(P_0\delta P)
+\mathrm{tr}(P_0\delta P)
 =
-\frac1n\operatorname{tr}(\mathbf 1\mathbf 1^\top\delta P)
+\frac1n\mathrm{tr}(\mathbf 1\mathbf 1^\top\delta P)
 =
 \frac1n\mathbf 1^\top\delta P\mathbf 1.
 $$
@@ -988,14 +988,14 @@ $$
 Therefore
 
 $$
-D\operatorname{tr}(P^k)\big|_{P=P_0}[\delta P]=0,
+D\mathrm{tr}(P^k)\big|_{P=P_0}[\delta P]=0,
 \qquad k\ge2.
 $$
 
 The case $k=1$ is different:
 
 $$
-D\operatorname{tr}(P)[\delta P]=\operatorname{tr}(\delta P).
+D\mathrm{tr}(P)[\delta P]=\mathrm{tr}(\delta P).
 $$
 
 This is not automatically zero for Birkhoff-tangent perturbations. Thus, if diagonal/self-loop entries are allowed, the $k=1$ trace term can provide a first-order signal at the uniform point. If the diagonal is hard-masked, or if self-loops are removed from the parameterisation, this $k=1$ direction is absent, and the trace-moment penalty is first-order silent at $P_0$.
@@ -1121,7 +1121,7 @@ This should be read as a local reduced-cost diagnostic rather than a global opti
 The practical differentiable relaxation uses logits $X$ and a temperature $\tau$:
 
 $$
-P=\operatorname{Sinkhorn}\left(\exp(X/\tau)\right).
+P=\mathrm{Sinkhorn}\left(\exp(X/\tau)\right).
 $$
 
 Then optimise
@@ -1284,8 +1284,8 @@ $$
 we have $P_0^k=P_0$ for $k\ge1$. For Birkhoff-tangent perturbations $\delta P$,
 
 $$
-D\operatorname{tr}(P^k)[\delta P]
-= k\operatorname{tr}(P_0\delta P)
+D\mathrm{tr}(P^k)[\delta P]
+= k\mathrm{tr}(P_0\delta P)
 = \frac{k}{n}\sum_{ij}\delta P_{ij}=0,
 \qquad k\ge2.
 $$
@@ -1373,7 +1373,7 @@ $$
 Although TSP motivates the trace moments, the stability analysis is more general. Many differentiable routing, matching, optimal transport, sparse-attention, and assignment systems use a Sinkhorn or doubly stochastic relaxation:
 
 $$
-P=\operatorname{Sinkhorn}(X).
+P=\mathrm{Sinkhorn}(X).
 $$
 
 If additional structural constraints are imposed,
@@ -1449,21 +1449,21 @@ This section is a working plan for turning the current derivation sketch into a 
 | Claim or ingredient | Treatment | Tactic |
 |---|---:|---|
 | The vertices of the Birkhoff polytope are permutation matrices. | Cite | Cite Birkhoff-von Neumann. No proof needed. |
-| Trace powers of a nonnegative adjacency matrix count weighted closed walks. | Cite + prove briefly | Include the expansion of $\operatorname{tr}(P^k)$ as a sum over closed walks; cite acyclicity/graphical-model literature if desired. |
+| Trace powers of a nonnegative adjacency matrix count weighted closed walks. | Cite + prove briefly | Include the expansion of $\mathrm{tr}(P^k)$ as a sum over closed walks; cite acyclicity/graphical-model literature if desired. |
 | Trace-power constraints over the Birkhoff polytope characterise Hamiltonian-cycle permutations. | Cite + proof sketch | Cite trace-guided ATSP / continuous acyclicity literature, but include a short support-graph proof sketch because this is central to the note. |
 | The coordinate flow $\dot P_{ij}=-P_{ij}(G_{ij}-a_i-b_j)$ preserves positivity. | Prove | Positivity follows from multiplicative form: $\dot P_{ij}/P_{ij}$ is finite while the solution remains smooth. |
 | The same flow preserves row and column sums when $a,b$ solve the gauge equations. | Prove | Sum over rows and columns to derive $a+Pb=r$, $P^\top a+b=c$. |
 | The $a,b$ system has gauge freedom. | Prove | Show $a\mapsto a+\gamma\mathbf 1,\;b\mapsto b-\gamma\mathbf 1$ leaves $a_i+b_j$ unchanged. Fix a gauge such as $\mathbf 1^\top a=0$. |
 | The flow is the KL/natural-gradient projection of $G$ onto the Birkhoff tangent space. | Prove lightly + cite | Define the Fisher/KL metric $\langle U,V\rangle_P=\sum_{ij}U_{ij}V_{ij}/P_{ij}$, then show the projected gradient has the coordinate form. Cite Sinkhorn/mirror-flow literature for context. |
-| First derivative of $\operatorname{tr}(P^k)$. | Prove | Use cyclicity of trace. |
-| Second variation of $\operatorname{tr}(P^k)$. | Prove | Expand $P+\epsilon \delta P$ and collect second-order terms, taking care of noncommutation. |
-| Pure penalty flow has a Lyapunov energy. | Prove | Once the KL gradient is defined, $dE/dt=-\|\operatorname{grad}^{\mathrm{KL}}_{\mathcal B}E\|_{\mathrm{KL}}^2\le0$. |
+| First derivative of $\mathrm{tr}(P^k)$. | Prove | Use cyclicity of trace. |
+| Second variation of $\mathrm{tr}(P^k)$. | Prove | Expand $P+\epsilon \delta P$ and collect second-order terms, taking care of noncommutation. |
+| Pure penalty flow has a Lyapunov energy. | Prove | Once the KL gradient is defined, $dE/dt=-\|\mathrm{grad}^{\mathrm{KL}}_{\mathcal B}E\|_{\mathrm{KL}}^2\le0$. |
 | Full metric-aware Jacobian at a stationary point has the schematic block form in Section 8. | Derive schematically | State this as the principal linearisation in local tangent coordinates. Avoid overclaiming until the metric/projection derivative is written carefully. |
 | The local primal-dual trace mode obeys a harmonic oscillator equation when $\rho=0$. | Prove in local coordinates | Use the simplified small-signal system $\dot z=-A^\top\lambda,\;\dot\lambda=\eta A z$, then diagonalise by the SVD of $A$. |
 | The augmented term produces damping. | Prove in local coordinates | With $\dot z=-A^\top\lambda-\rho A^\top A z,\;\dot\lambda=\eta A z$, a singular mode satisfies $\ddot q+\rho\sigma^2\dot q+\eta\sigma^2q=0$. |
 | The split $A\delta P\neq0$ versus $A\delta P=0$ separates trace-visible and trace-tangent modes. | Prove as linear algebra; interpret carefully | The penalty contributes first-order stiffness only through $A$. Calling these “validity” and “optimality” modes is an interpretation. |
-| Trace gradients are first-order invisible at the uniform point for $k\ge2$. | Prove | At $P_0=J/n$, $P_0^k=P_0$, and $D\operatorname{tr}(P^k)[\delta P]=(k/n)\sum_{ij}\delta P_{ij}=0$ on the Birkhoff tangent space. |
-| The $k=1$ trace signal at uniform is special. | Prove / qualify | $D\operatorname{tr}(P)[\delta P]=\operatorname{tr}(\delta P)$, not automatically zero on the Birkhoff tangent space. With diagonal masking/no-self-loop constraints this signal is removed. |
+| Trace gradients are first-order invisible at the uniform point for $k\ge2$. | Prove | At $P_0=J/n$, $P_0^k=P_0$, and $D\mathrm{tr}(P^k)[\delta P]=(k/n)\sum_{ij}\delta P_{ij}=0$ on the Birkhoff tangent space. |
+| The $k=1$ trace signal at uniform is special. | Prove / qualify | $D\mathrm{tr}(P)[\delta P]=\mathrm{tr}(\delta P)$, not automatically zero on the Birkhoff tangent space. With diagonal masking/no-self-loop constraints this signal is removed. |
 | Off-support edge masses obey a reduced-cost log-rate near a tour. | Prove local formula | For positive entries, $d(\log P_{ij})/dt=-(G_{ij}-a_i-b_j)$. Near a permutation support, apply this to small off-support entries. |
 | Tangent cone at a permutation vertex is generated by alternating cycles. | Cite / optional proof sketch | Standard assignment-polytope fact. We can cite and use it to interpret boundary exchange modes. |
 | Local stability of a tour is equivalent to positive augmented reduced cost on all exchange directions. | Heuristic / future theorem | Plausible and useful, but needs careful tangent-cone and trace-constraint handling before presenting as a theorem. |
@@ -1506,18 +1506,18 @@ Status: proof included in Section 6.
 Prove the first derivative
 
 $$
-D\operatorname{tr}(P^k)[\delta P]
+D\mathrm{tr}(P^k)[\delta P]
 =
-k\operatorname{tr}(P^{k-1}\delta P),
+k\mathrm{tr}(P^{k-1}\delta P),
 $$
 
 and the second variation
 
 $$
-D^2\operatorname{tr}(P^k)[\delta P,\delta P]
+D^2\mathrm{tr}(P^k)[\delta P,\delta P]
 =
 k\sum_{r=0}^{k-2}
-\operatorname{tr}(P^r\delta P P^{k-2-r}\delta P).
+\mathrm{tr}(P^r\delta P P^{k-2-r}\delta P).
 $$
 
 Deliverables:
@@ -1534,11 +1534,11 @@ Status: proof sketch included in Section 2; still needs citation polish. Cite th
 
 Proof route:
 
-1. For $P\ge0$, $\operatorname{tr}(P^k)$ is a sum of nonnegative weighted closed walks of length $k$.
-2. Hence $\operatorname{tr}(P^k)=0$ forbids all positive closed walks of length $k$.
+1. For $P\ge0$, $\mathrm{tr}(P^k)$ is a sum of nonnegative weighted closed walks of length $k$.
+2. Hence $\mathrm{tr}(P^k)=0$ forbids all positive closed walks of length $k$.
 3. A doubly stochastic support graph must contain directed cycles.
 4. If all cycles of length $<n$ are forbidden, the only possible support cycle length is $n$.
-5. With $\operatorname{tr}(P^n)=n$, the support and weights collapse to a single $n$-cycle permutation.
+5. With $\mathrm{tr}(P^n)=n$, the support and weights collapse to a single $n$-cycle permutation.
 
 The last collapse step should be written carefully; it is the only part where handwaving is tempting.
 
@@ -1553,7 +1553,7 @@ Once the KL gradient has been defined, show
 $$
 \frac{dE_\rho}{dt}
 =
--\left\|\operatorname{grad}^{\mathrm{KL}}_{\mathcal B}E_\rho(P)\right\|^2_{\mathrm{KL}}
+-\left\|\mathrm{grad}^{\mathrm{KL}}_{\mathcal B}E_\rho(P)\right\|^2_{\mathrm{KL}}
 \le0.
 $$
 
