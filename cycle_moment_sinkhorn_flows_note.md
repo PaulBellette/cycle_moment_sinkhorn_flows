@@ -399,11 +399,45 @@ with
 
 The augmented term is expected to damp trace-constraint ringing.
 
-### TODO proof sketch
+### Linearisation reference
 
-- Derive the primal-dual linearisation.
-- Derive the augmented primal-dual linearisation.
-- Show how the penalty term contributes a \(\rho A^\top A\)-type damping/stiffness term in trace-violating directions.
+The local linearisation and damping calculation are carried out in Section 8. The role of this section is to define the primal-dual and augmented primal-dual systems; the stability mechanism is easier to see after introducing the trace Jacobian and local tangent coordinates.
+
+In brief, near an interior stationary point and in local coordinates \(z\) on the Birkhoff tangent space, the trace constraints linearise as
+
+\[
+h(P_*+z)\approx A z.
+\]
+
+Ignoring cost curvature for the moment, the pure primal-dual trace subsystem has the normal form
+
+\[
+\dot z=-A^\top\lambda,
+\qquad
+\dot\lambda=\eta A z.
+\]
+
+The augmented system adds the local penalty gradient
+
+\[
+\rho A^\top A z,
+\]
+
+so that
+
+\[
+\dot z=-A^\top\lambda-\rho A^\top A z,
+\qquad
+\dot\lambda=\eta A z.
+\]
+
+Along a singular mode \(A v_i=\sigma_i u_i\), this gives
+
+\[
+\ddot q+\rho\sigma_i^2\dot q+\eta\sigma_i^2q=0.
+\]
+
+Thus the pure primal-dual model has undamped trace-control modes, while the augmented model damps them. Section 8 gives the derivation and the caveat that the full nonlinear Sinkhorn/logit dynamics can instead appear as delayed snapping or support hardening rather than a clean sinusoid.
 
 ## 6. Trace Derivatives and Constraint Jacobian
 
@@ -895,12 +929,70 @@ This suggests that most trace-power constraints are first-order invisible at the
 
 A practical implication is that one should not initialise exactly at uniform logits. Small symmetry-breaking perturbations may be necessary.
 
-### TODO proof sketch
+### Proposition: first-order degeneracy at the uniform point
 
-- Check the \(k=1\) case separately.
-- Account for diagonal/no-self-loop constraints if used.
-- Determine the exact rank of \(A=Dh(P_0)\) restricted to \(T_{P_0}\mathcal B\).
-- Study whether second-order trace information becomes visible at uniform.
+Let
+
+\[
+P_0=\frac{1}{n}\mathbf 1\mathbf 1^\top
+\]
+
+and let
+
+\[
+\delta P\in T_{P_0}\mathcal B_n
+=
+\{\delta P:\delta P\mathbf 1=0,\;\delta P^\top\mathbf 1=0\}.
+\]
+
+Then for every \(k\ge2\),
+
+\[
+D\operatorname{tr}(P^k)\big|_{P=P_0}[\delta P]=0.
+\]
+
+Proof. Since \(P_0^m=P_0\) for every \(m\ge1\), the trace derivative gives
+
+\[
+D\operatorname{tr}(P^k)\big|_{P=P_0}[\delta P]
+=
+k\operatorname{tr}(P_0^{k-1}\delta P)
+=
+k\operatorname{tr}(P_0\delta P).
+\]
+
+Using \(P_0=(1/n)\mathbf 1\mathbf 1^\top\),
+
+\[
+\operatorname{tr}(P_0\delta P)
+=
+\frac1n\operatorname{tr}(\mathbf 1\mathbf 1^\top\delta P)
+=
+\frac1n\mathbf 1^\top\delta P\mathbf 1.
+\]
+
+But \(\delta P\mathbf 1=0\), so
+
+\[
+\mathbf 1^\top\delta P\mathbf 1=0.
+\]
+
+Therefore
+
+\[
+D\operatorname{tr}(P^k)\big|_{P=P_0}[\delta P]=0,
+\qquad k\ge2.
+\]
+
+The case \(k=1\) is different:
+
+\[
+D\operatorname{tr}(P)[\delta P]=\operatorname{tr}(\delta P).
+\]
+
+This is not automatically zero for Birkhoff-tangent perturbations. Thus, if diagonal/self-loop entries are allowed, the \(k=1\) trace term can provide a first-order signal at the uniform point. If the diagonal is hard-masked, or if self-loops are removed from the parameterisation, this \(k=1\) direction is absent, and the trace-moment penalty is first-order silent at \(P_0\).
+
+Consequently, in the no-self-loop setting, exact uniform initialisation is a degenerate point for the trace penalties. Small random logit perturbations are needed to break symmetry and reveal trace-gradient information.
 
 ## 10. Boundary Behaviour and Reduced-Cost Stability Near Tours
 
@@ -940,13 +1032,81 @@ At a permutation vertex, feasible directions of the Birkhoff polytope correspond
 
 This connects the continuous flow to combinatorial local-search moves such as cycle exchanges and \(k\)-opt-like perturbations.
 
-### TODO proof sketch
+### Local log-rate and reduced-cost interpretation
 
-- Formalise near-boundary asymptotics using \(P_\epsilon\) with small off-support mass.
-- Derive the log-coordinate reduced-cost equation.
-- State the tangent cone of the Birkhoff polytope at a permutation vertex.
-- Relate tangent-cone generators to alternating cycles.
-- Clarify how trace constraints restrict or modify exchange directions.
+For any strictly positive entry of the KL flow,
+
+\[
+\dot P_{ij}
+=
+-P_{ij}(G_{ij}-a_i-b_j).
+\]
+
+Therefore
+
+\[
+\frac{d}{dt}\log P_{ij}
+=
+-(G_{ij}-a_i-b_j).
+\]
+
+Define the reduced augmented cost
+
+\[
+\Delta_{ij}=G_{ij}-a_i-b_j.
+\]
+
+Then
+
+\[
+\frac{d}{dt}\log P_{ij}=-\Delta_{ij}.
+\]
+
+Near a permutation tour, off-support entries are small but positive if we remain in the Birkhoff interior. For such an off-support edge,
+
+\[
+P_{ij}(t)\approx P_{ij}(0)e^{-\Delta_{ij}t}
+\]
+
+as long as \(\Delta_{ij}\) varies slowly. Thus positive reduced cost suppresses that edge, while negative reduced cost makes it grow.
+
+At the exact boundary, however, the KL flow degenerates: if \(P_{ij}=0\), then \(\dot P_{ij}=0\). Exact permutation matrices are therefore absorbing supports for the multiplicative flow. Boundary stability is better interpreted through near-boundary limits or log coordinates.
+
+The feasible perturbations of a permutation vertex are not arbitrary single-edge perturbations. They must preserve row and column sums, so they are generated by alternating-cycle exchange directions in the assignment polytope. If \(D\) is such a feasible exchange direction, then
+
+\[
+D\mathbf 1=0,\qquad D^\top\mathbf 1=0.
+\]
+
+Consequently,
+
+\[
+\langle \Delta,D\rangle
+=
+\sum_{ij}(G_{ij}-a_i-b_j)D_{ij}
+=
+\sum_{ij}G_{ij}D_{ij}
+=
+\langle G,D\rangle,
+\]
+
+because the row and column potential terms vanish on feasible directions.
+
+Thus a candidate tour is locally stable against a feasible exchange direction \(D\) when
+
+\[
+\langle G,D\rangle>0.
+\]
+
+Equivalently, every allowed alternating-cycle exchange should have positive augmented reduced cost. If some feasible exchange direction has
+
+\[
+\langle G,D\rangle<0,
+\]
+
+then the augmented energy decreases along that exchange direction, and the near-boundary flow has a mechanism for leaking mass toward the corresponding non-tour edges.
+
+This should be read as a local reduced-cost diagnostic rather than a global optimality theorem. A full theorem would require a precise tangent-cone statement for the Birkhoff vertex and a careful treatment of the trace constraints on the exchange directions.
 
 ## 11. Practical Autodiff/Sinkhorn Recipe
 
@@ -1303,13 +1463,15 @@ This section is a working plan for turning the current derivation sketch into a 
 | General relevance to Sinkhorn routing. | Discussion + optional generic proposition | The generic \(h(P)\) local model is formal; claims about routing/attention applications should stay as discussion. |
 | Adaptive \(\rho\) based on \(A M A^\top\). | Future work | Motivated by analysis and numerics, but not yet established. |
 
-### 15.2 Suggested proof order
+### 15.2 Suggested proof order and current status
 
-The most efficient order is to prove the facts that unlock several sections at once.
+The most efficient order is to prove the facts that unlock several sections at once. In this draft, the main proof sketches have now been incorporated: the remaining work is mostly citation polishing, deciding how formal to make the manifold linearisation, and deciding which interpretive claims should remain future work.
 
 #### Step 1: Birkhoff-preserving KL projection
 
 Target sections: 3, 4, 7.
+
+Status: proof plan included in Section 3.
 
 Prove that the coordinate flow
 
@@ -1330,6 +1492,8 @@ Deliverables:
 #### Step 2: Trace calculus
 
 Target sections: 4, 6, 8, 9.
+
+Status: proof included in Section 6.
 
 Prove the first derivative
 
@@ -1358,7 +1522,7 @@ Deliverables:
 
 Target sections: 2 and 15.
 
-Cite the relevant trace-acyclicity / trace-guided ATSP literature, but include a short proof sketch.
+Status: proof sketch included in Section 2; still needs citation polish. Cite the relevant trace-acyclicity / trace-guided ATSP literature.
 
 Proof route:
 
@@ -1374,6 +1538,8 @@ The last collapse step should be written carefully; it is the only part where ha
 
 Target section: 7.
 
+Status: proof included in Section 7.
+
 Once the KL gradient has been defined, show
 
 \[
@@ -1388,6 +1554,8 @@ This should be a short corollary.
 #### Step 5: Local primal-dual damping model
 
 Target sections: 5, 8, 12.6.
+
+Status: local normal-form model included in Section 8; Section 5 now points forward to it.
 
 In local coordinates \(z\) on the Birkhoff tangent space, derive the simplified small-signal model
 
@@ -1411,6 +1579,8 @@ This exactly matches the linearised ringing/damping figure.
 
 Target sections: 9 and 12.5.
 
+Status: proposition included in Section 9.
+
 Prove the first-order degeneracy at \(P_0=J/n\). This is short, central, and strongly supported by the numerical diagnostic.
 
 Deliverables:
@@ -1422,6 +1592,8 @@ Deliverables:
 #### Step 7: Boundary reduced-cost analysis
 
 Target section: 10.
+
+Status: local log-rate formula and reduced-cost interpretation included in Section 10; tangent-cone theorem remains future work.
 
 Prove the log-rate formula
 
@@ -1472,7 +1644,7 @@ The following ideas are useful, but should remain carefully worded until proved.
 
 ## 16. Open Questions
 
-1. Give a clean self-contained proof/citation that the trace-power constraints characterise single Hamiltonian cycles over the Birkhoff polytope under nonnegativity and no-self-loop assumptions.
+1. Find the cleanest citation trail for the trace-moment Hamiltonian-cycle characterisation, complementing the self-contained proof in Section 2.
 2. What is the exact rank of the trace-constraint Jacobian at symmetric points?
 3. How severe is the first-order degeneracy near uniform initialisation in practical finite-temperature Sinkhorn optimisation?
 4. Can the spectrum of \(A M A^\top\) be used to adaptively tune augmentation strength \(\rho\)?
