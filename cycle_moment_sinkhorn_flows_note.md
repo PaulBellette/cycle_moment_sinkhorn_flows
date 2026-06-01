@@ -697,6 +697,14 @@ For the primal-dual flow, the linearisation has the schematic block form
 \end{bmatrix}.
 \]
 
+Here \(M_*\) denotes the KL mobility/projection operator at \(P_*\). Concretely, for a Euclidean covector \(Q\), \(M_*Q\) is the Birkhoff-tangent vector
+
+\[
+(M_*Q)_{ij}=P_{*,ij}(Q_{ij}-\alpha_i-\beta_j),
+\]
+
+where \(\alpha,\beta\) are chosen so that \(M_*Q\) has zero row and column sums. Thus \(M_*\) is the metric-dependent analogue of projecting an ordinary Euclidean gradient onto the tangent space. In the simplified local-coordinate model below, this operator is absorbed into the choice of coordinates, which is why the normal form uses \(A^\top A\) directly.
+
 For the augmented primal-dual flow, the linearisation becomes
 
 \[
