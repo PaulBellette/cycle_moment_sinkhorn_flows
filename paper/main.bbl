@@ -1,0 +1,56 @@
+\begin{thebibliography}{8}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Balinski and Russakoff(1974)]{balinski1974assignment}
+M.~L. Balinski and Andrew Russakoff.
+\newblock On the assignment polytope.
+\newblock \emph{SIAM Review}, 16\penalty0 (4):\penalty0 516--525, 1974.
+\newblock \doi{10.1137/1016083}.
+
+\bibitem[Ballu and Berthet(2023)]{ballu2023mirror}
+Marin Ballu and Quentin Berthet.
+\newblock Mirror sinkhorn: fast online optimization on transport polytopes.
+\newblock In \emph{International Conference on Machine Learning}, pages
+  1595--1613. PMLR, 2023.
+
+\bibitem[Brockett(1991)]{brockett1991dynamical}
+Roger~W Brockett.
+\newblock Dynamical systems that sort lists, diagonalize matrices, and solve
+  linear programming problems.
+\newblock \emph{Linear Algebra and its applications}, 146:\penalty0 79--91,
+  1991.
+
+\bibitem[Karimi et~al.(2023)Karimi, Hsieh, and Krause]{karimi2023sinkhorn}
+Mohammad~Reza Karimi, Ya-Ping Hsieh, and Andreas Krause.
+\newblock Sinkhorn flow: A continuous-time framework for understanding and
+  generalizing the sinkhorn algorithm.
+\newblock \emph{arXiv preprint arXiv:2311.16706}, 2023.
+
+\bibitem[Luenberger et~al.(1984)Luenberger, Ye, et~al.]{luenberger1984linear}
+David~G Luenberger, Yinyu Ye, et~al.
+\newblock \emph{Linear and nonlinear programming}, volume~2.
+\newblock Springer, 1984.
+
+\bibitem[Nutz(2021)]{nutz2021introduction}
+Marcel Nutz.
+\newblock Introduction to entropic optimal transport.
+\newblock \emph{Lecture notes, Columbia University}, 306\penalty0
+  (19):\penalty0 307, 2021.
+
+\bibitem[Zhang et~al.(2026)Zhang, Shi, and Lee]{zhang2026solving}
+Zhen Zhang, Prof Javen~Qinfeng Shi, and Wee~Sun Lee.
+\newblock Solving the asymmetric traveling salesman problem via trace-guided
+  cost augmentation.
+\newblock \emph{Advances in Neural Information Processing Systems},
+  38:\penalty0 57211--57232, 2026.
+
+\bibitem[Zheng et~al.(2018)Zheng, Aragam, Ravikumar, and Xing]{zheng2018dags}
+Xun Zheng, Bryon Aragam, Pradeep~K Ravikumar, and Eric~P Xing.
+\newblock Dags with no tears: Continuous optimization for structure learning.
+\newblock \emph{Advances in neural information processing systems}, 31, 2018.
+
+\end{thebibliography}
