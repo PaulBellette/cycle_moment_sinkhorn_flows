@@ -21,6 +21,7 @@ Experiments:
   B. Constraint-only primal-dual ringing: rho=0 vs augmented rho>0.
   C. Uniform initialisation degeneracy: trace-gradient norm vs perturbation scale.
   D. Two-cluster TSP-like instance: fixed/scheduled penalty comparison.
+  E. Rho-pressure sweep and rho/tau phase diagram.
 
 The code intentionally favours clarity over efficiency. Keep n small.
 """
@@ -28,6 +29,7 @@ The code intentionally favours clarity over efficiency. Keep n small.
 from __future__ import annotations
 
 import argparse
+import csv
 import itertools
 import math
 import os
@@ -158,6 +160,34 @@ def greedy_perm_from_P(P: Tensor) -> List[int]:
         if perm[i] < 0:
             perm[i] = remaining_cols.pop()
     return perm
+
+
+def assignment_perm_from_P(P: Tensor, max_bruteforce_n: int = 9) -> List[int]:
+    """Exact assignment projection: maximise sum_i P[i, perm[i]].
+
+    For the small diagnostic problems in this note, brute force is simpler than
+    adding SciPy as a dependency. Falls back to greedy if n is too large.
+    """
+    n = P.shape[0]
+    if n > max_bruteforce_n:
+        return greedy_perm_from_P(P)
+    P_np = P.detach().cpu().numpy()
+    best_score = -math.inf
+    best_perm: Tuple[int, ...] = tuple(range(n))
+    for perm in itertools.permutations(range(n)):
+        score = float(sum(P_np[i, perm[i]] for i in range(n)))
+        if score > best_score:
+            best_score = score
+            best_perm = perm
+    return list(best_perm)
+
+
+def projection_perm_from_P(P: Tensor, method: str = "assignment") -> List[int]:
+    if method == "greedy":
+        return greedy_perm_from_P(P)
+    if method == "assignment":
+        return assignment_perm_from_P(P)
+    raise ValueError(f"unknown projection method: {method}")
 
 
 def perm_cost(perm: List[int], C_np: np.ndarray) -> float:
@@ -461,9 +491,9 @@ def plot_history(histories: Dict[str, History], outdir: Path, prefix: str, title
         plt.close()
 
 
-def plot_points_and_perm(pts: np.ndarray, P: Tensor, C_np: np.ndarray, outdir: Path, prefix: str, title: str) -> None:
+def plot_points_and_perm(pts: np.ndarray, P: Tensor, C_np: np.ndarray, outdir: Path, prefix: str, title: str, method: str = "assignment") -> None:
     ensure_outdir(outdir)
-    perm = greedy_perm_from_P(P)
+    perm = projection_perm_from_P(P, method=method)
     cycles = count_cycles(perm)
     plt.figure(figsize=(5, 5))
     plt.scatter(pts[:, 0], pts[:, 1])
@@ -474,9 +504,9 @@ def plot_points_and_perm(pts: np.ndarray, P: Tensor, C_np: np.ndarray, outdir: P
         x1, y1 = pts[j]
         plt.arrow(x0, y0, 0.85 * (x1 - x0), 0.85 * (y1 - y0), head_width=0.06, length_includes_head=True, alpha=0.65)
     plt.axis("equal")
-    plt.title(f"{title}\ncycles={list(map(len, cycles))}, greedy cost={perm_cost(perm, C_np):.3f}")
+    plt.title(f"{title}\ncycles={list(map(len, cycles))}, {method} cost={perm_cost(perm, C_np):.3f}")
     plt.tight_layout()
-    plt.savefig(outdir / f"{prefix}_greedy_perm.png", dpi=160)
+    plt.savefig(outdir / f"{prefix}_{method}_perm.png", dpi=160)
     plt.close()
 
 
@@ -678,6 +708,95 @@ def plot_rho_pressure(rhos: List[float], summaries: Dict[str, List[float]], cycl
                 f"{summaries['entropy'][i]}\t{cycle_strings[i]}\n"
             )
 
+
+
+def write_summary_csv(rows: List[Dict[str, object]], path: Path) -> None:
+    if not rows:
+        return
+    keys = sorted({k for row in rows for k in row.keys()})
+    with open(path, "w", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=keys)
+        writer.writeheader()
+        for row in rows:
+            writer.writerow(row)
+
+
+def median_iqr(values: List[float]) -> Tuple[float, float, float]:
+    arr = np.asarray(values, dtype=float)
+    return float(np.median(arr)), float(np.quantile(arr, 0.25)), float(np.quantile(arr, 0.75))
+
+
+def plot_rho_pressure_aggregate(rows: List[Dict[str, object]], outdir: Path, prefix: str, title: str) -> None:
+    ensure_outdir(outdir)
+    rhos = sorted({float(r["rho"]) for r in rows})
+    metrics = [
+        ("h_norm", "final ||h(P)||"),
+        ("assignment_cost", "assignment-projected cost"),
+        ("relaxed_cost", "relaxed cost <C,P>"),
+        ("entropy", "entropy H(P)"),
+        ("sharpness", "mean row max"),
+    ]
+    for key, ylabel in metrics:
+        med, q1, q3 = [], [], []
+        for rho in rhos:
+            vals = [float(r[key]) for r in rows if float(r["rho"]) == rho]
+            m, lo, hi = median_iqr(vals)
+            med.append(m); q1.append(lo); q3.append(hi)
+        plt.figure(figsize=(7, 4.5))
+        plt.semilogx(rhos, med, marker="o")
+        plt.fill_between(rhos, q1, q3, alpha=0.2)
+        plt.xlabel("fixed trace penalty rho")
+        plt.ylabel(ylabel)
+        plt.title(title)
+        plt.tight_layout()
+        plt.savefig(outdir / f"{prefix}_rho_pressure_{key}_aggregate.png", dpi=160)
+        plt.close()
+
+    probs = []
+    for rho in rhos:
+        vals = [1.0 if bool(r["assignment_single_cycle"]) else 0.0 for r in rows if float(r["rho"]) == rho]
+        probs.append(float(np.mean(vals)))
+    plt.figure(figsize=(7, 4.5))
+    plt.semilogx(rhos, probs, marker="o")
+    plt.ylim(-0.05, 1.05)
+    plt.xlabel("fixed trace penalty rho")
+    plt.ylabel("P(assignment projection is one cycle)")
+    plt.title(title)
+    plt.tight_layout()
+    plt.savefig(outdir / f"{prefix}_rho_pressure_single_cycle_probability.png", dpi=160)
+    plt.close()
+
+
+def plot_phase_heatmaps(rows: List[Dict[str, object]], outdir: Path, prefix: str, title: str) -> None:
+    ensure_outdir(outdir)
+    rhos = sorted({float(r["rho"]) for r in rows})
+    taus = sorted({float(r["tau"]) for r in rows})
+    metrics = [
+        ("h_norm", "final ||h(P)||"),
+        ("assignment_cost", "assignment-projected cost"),
+        ("assignment_single_cycle", "single-cycle indicator"),
+        ("entropy", "entropy H(P)"),
+        ("sharpness", "mean row max"),
+    ]
+    for key, label in metrics:
+        Z = np.full((len(taus), len(rhos)), np.nan)
+        for i, tau in enumerate(taus):
+            for j, rho in enumerate(rhos):
+                vals = [float(r[key]) for r in rows if float(r["rho"]) == rho and float(r["tau"]) == tau]
+                if vals:
+                    Z[i, j] = float(np.median(vals))
+        plt.figure(figsize=(8, 4.8))
+        im = plt.imshow(Z, aspect="auto", origin="lower")
+        plt.colorbar(im, label=label)
+        plt.xticks(range(len(rhos)), [f"{r:g}" for r in rhos], rotation=45)
+        plt.yticks(range(len(taus)), [f"{t:g}" for t in taus])
+        plt.xlabel("rho")
+        plt.ylabel("tau")
+        plt.title(f"{title}: {label}")
+        plt.tight_layout()
+        plt.savefig(outdir / f"{prefix}_phase_{key}.png", dpi=160)
+        plt.close()
+
 # -----------------------------------------------------------------------------
 # Experiment driver
 # -----------------------------------------------------------------------------
@@ -804,46 +923,105 @@ def experiment_two_cluster(outdir: Path, n: int, seed: int) -> None:
 
 
 
-def experiment_rho_pressure(outdir: Path, n: int, seed: int) -> None:
-    """Sweep fixed rho on the two-cluster instance to expose the validity/pressure threshold."""
-    pts, C = two_cluster_instance(n, sep=6.0, sigma=0.35, seed=seed)
+def experiment_rho_pressure(outdir: Path, n: int, seeds: List[int]) -> None:
+    """Sweep fixed rho on the two-cluster instance to expose the validity/pressure threshold.
+
+    Uses exact assignment projection for the readout, not the greedy projection.
+    Multiple seeds are aggregated into median/IQR plots and a single-cycle probability.
+    """
     rhos = [0.25, 0.5, 1.0, 2.0, 5.0, 10.0, 20.0, 50.0, 100.0, 200.0, 400.0]
-    summaries = {"h_norm": [], "relaxed_cost": [], "greedy_cost": [], "sharpness": [], "entropy": []}
-    cycle_strings: List[str] = []
-    best, order = brute_force_atsp(C)
-    print(f"[rho-pressure] two-cluster brute force best={best:.6f}, order={order}")
-    for rho in rhos:
-        cfg = RunConfig(steps=1500, lr=0.03, rho=rho, tau=0.8, seed=seed, log_every=10)
-        hist, P = run_penalty_sinkhorn(C, cfg)
-        perm = greedy_perm_from_P(P)
-        cycles = count_cycles(perm)
-        cs = str(list(map(len, cycles)))
-        cycle_strings.append(cs)
-        summaries["h_norm"].append(hist.h_norm[-1])
-        summaries["relaxed_cost"].append(hist.cost[-1])
-        summaries["greedy_cost"].append(perm_cost(perm, C))
-        summaries["sharpness"].append(hist.sharpness[-1])
-        summaries["entropy"].append(hist.entropy[-1])
-        print(f"  rho={rho:7.2f} h={hist.h_norm[-1]:9.3e} relaxed={hist.cost[-1]:8.3f} greedy={summaries['greedy_cost'][-1]:8.3f} cycles={cs}")
+    rows: List[Dict[str, object]] = []
+    for seed in seeds:
+        pts, C = two_cluster_instance(n, sep=6.0, sigma=0.35, seed=seed)
+        best, order = brute_force_atsp(C)
+        print(f"[rho-pressure] seed={seed} two-cluster brute force best={best:.6f}, order={order}")
+        for rho in rhos:
+            cfg = RunConfig(steps=300, lr=0.04, rho=rho, tau=0.8, seed=seed, log_every=10, sinkhorn_iters=50)
+            hist, P = run_penalty_sinkhorn(C, cfg)
+            greedy = greedy_perm_from_P(P)
+            assign = assignment_perm_from_P(P)
+            assign_cycles = count_cycles(assign)
+            row = {
+                "experiment": "rho_pressure",
+                "seed": seed,
+                "n": n,
+                "rho": rho,
+                "tau": 0.8,
+                "h_norm": hist.h_norm[-1],
+                "relaxed_cost": hist.cost[-1],
+                "greedy_cost": perm_cost(greedy, C),
+                "assignment_cost": perm_cost(assign, C),
+                "opt_cost": best,
+                "assignment_gap": (perm_cost(assign, C) - best) / best,
+                "sharpness": hist.sharpness[-1],
+                "entropy": hist.entropy[-1],
+                "greedy_cycles": str(list(map(len, count_cycles(greedy)))),
+                "assignment_cycles": str(list(map(len, assign_cycles))),
+                "assignment_single_cycle": len(assign_cycles) == 1,
+            }
+            rows.append(row)
+            print(
+                f"  seed={seed:3d} rho={rho:7.2f} h={row['h_norm']:9.3e} "
+                f"assign={row['assignment_cost']:8.3f} cycles={row['assignment_cycles']}"
+            )
+    write_summary_csv(rows, outdir / "two_cluster_rho_pressure_summary.csv")
+    plot_rho_pressure_aggregate(rows, outdir, "two_cluster", f"Two-cluster rho-pressure sweep (n={n}, seeds={len(seeds)})")
 
-    plot_rho_pressure(rhos, summaries, cycle_strings, outdir, "two_cluster", f"Two-cluster rho-pressure sweep (n={n})")
 
+def experiment_phase_diagram(outdir: Path, n: int, seeds: List[int]) -> None:
+    """A small rho/tau phase diagram for the two-cluster instance."""
+    rhos = [0.5, 1.0, 2.0, 5.0, 10.0, 20.0, 50.0, 100.0]
+    taus = [0.35, 0.5, 0.8, 1.2, 1.8, 3.0]
+    rows: List[Dict[str, object]] = []
+    # Keep this cheap: use a few seeds, but shorter runs than the main sweep.
+    for seed in seeds:
+        pts, C = two_cluster_instance(n, sep=6.0, sigma=0.35, seed=seed)
+        best, order = brute_force_atsp(C)
+        print(f"[phase] seed={seed} brute force best={best:.6f}")
+        for tau in taus:
+            for rho in rhos:
+                cfg = RunConfig(steps=220, lr=0.04, rho=rho, tau=tau, seed=seed, log_every=30, sinkhorn_iters=50)
+                hist, P = run_penalty_sinkhorn(C, cfg)
+                assign = assignment_perm_from_P(P)
+                assign_cycles = count_cycles(assign)
+                rows.append({
+                    "experiment": "phase_diagram",
+                    "seed": seed,
+                    "n": n,
+                    "rho": rho,
+                    "tau": tau,
+                    "h_norm": hist.h_norm[-1],
+                    "relaxed_cost": hist.cost[-1],
+                    "assignment_cost": perm_cost(assign, C),
+                    "opt_cost": best,
+                    "assignment_gap": (perm_cost(assign, C) - best) / best,
+                    "sharpness": hist.sharpness[-1],
+                    "entropy": hist.entropy[-1],
+                    "assignment_cycles": str(list(map(len, assign_cycles))),
+                    "assignment_single_cycle": len(assign_cycles) == 1,
+                })
+    write_summary_csv(rows, outdir / "two_cluster_phase_diagram_summary.csv")
+    plot_phase_heatmaps(rows, outdir, "two_cluster", f"Two-cluster rho/tau phase diagram (n={n}, seeds={len(seeds)})")
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Cycle-moment Sinkhorn flow experiments")
     parser.add_argument("--outdir", type=Path, default=Path("cycle_moment_outputs"))
     parser.add_argument("--n", type=int, default=8, help="small n; brute force scales factorially")
     parser.add_argument("--seed", type=int, default=7)
+    parser.add_argument("--seeds", type=str, default=None, help="comma-separated seeds for aggregate sweeps; default uses --seed")
     parser.add_argument("--skip-circle", action="store_true")
     parser.add_argument("--skip-ringing", action="store_true")
     parser.add_argument("--skip-uniform", action="store_true")
     parser.add_argument("--skip-two-cluster", action="store_true")
     parser.add_argument("--skip-rho-pressure", action="store_true")
+    parser.add_argument("--run-phase-diagram", action="store_true", help="run the optional rho/tau grid; slower")
     args = parser.parse_args()
 
     ensure_outdir(args.outdir)
+    seeds = [args.seed] if args.seeds is None else [int(x) for x in args.seeds.split(",") if x.strip()]
     print(f"Writing outputs to {args.outdir.resolve()}")
     print("Tip: n=8 is intentionally small so brute force is feasible.")
+    print(f"Aggregate seeds: {seeds}")
 
     if not args.skip_circle:
         experiment_circle(args.outdir, args.n, args.seed)
@@ -854,7 +1032,9 @@ def main() -> None:
     if not args.skip_two_cluster:
         experiment_two_cluster(args.outdir, args.n, args.seed)
     if not args.skip_rho_pressure:
-        experiment_rho_pressure(args.outdir, args.n, args.seed)
+        experiment_rho_pressure(args.outdir, args.n, seeds)
+    if args.run_phase_diagram:
+        experiment_phase_diagram(args.outdir, args.n, seeds[: min(len(seeds), 3)])
 
     print("Done. Generated PNG plots and diagnostics in the output directory.")
 

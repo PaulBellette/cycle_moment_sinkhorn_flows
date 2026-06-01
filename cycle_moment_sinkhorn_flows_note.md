@@ -495,7 +495,7 @@ P=\operatorname{Sinkhorn}\left(\exp(X/\tau)\right).
 Then optimise
 
 \[
-E_{\rho,\tau}(X)=\langle C,P\rangle+frac{\rho}{2}\sum_{k=1}^n h_k(P)^2.
+E_{\rho,\tau}(X)=\langle C,P\rangle+\frac{\rho}{2}\sum_{k=1}^n h_k(P)^2.
 \]
 
 The stability analysis suggests:
@@ -522,31 +522,219 @@ A M A^\top.
 
 ## 12. Numerical Investigation
 
-<!-- Intentionally left blank for future experiments. -->
+The experiments are diagnostic rather than benchmark-oriented. The aim is not to compete with specialised TSP solvers, but to test the stability predictions of the trace-constrained Sinkhorn-flow picture:
 
-### 12.1 Constraint ringing
+1. trace penalties enforce Hamiltonicity/validity modes;
+2. cost and annealing select among valid cycles;
+3. symmetric initialisation can suppress first-order trace signal;
+4. pure primal-dual trace dynamics has undamped oscillatory modes;
+5. augmented penalties damp trace-visible modes.
 
+All experiments use small instances, typically \(n=8\), so that exact Hamiltonian optima and exact assignment projections can be computed by brute force. The script writes machine-readable CSV summaries in addition to plots.
 
+### 12.1 Friendly circle sanity check
 
-### 12.2 Augmented damping
+For points on a circle, the optimal Euclidean tour is the clockwise or anticlockwise nearest-neighbour cycle. This gives a low-noise sanity check that the relaxation can recover an obvious Hamiltonian cycle.
 
+Two configurations are compared:
 
+- a continuation schedule with \(\rho\uparrow\) and \(\tau\downarrow\);
+- a fixed \(\rho,\tau\) run.
 
-### 12.3 Uniform initialisation degeneracy
+The continuation run recovers the geometric optimum. The fixed run can still produce a single Hamiltonian cycle, but with long chords and crossings. This demonstrates the separation between validity and optimality:
 
+\[
+\text{trace moments can enforce a single cycle without selecting the best cycle.}
+\]
 
+Key files:
 
-### 12.4 Spectrum of the trace-constraint Jacobian
+- [circle cost](cycle_moment_outputs/circle_cost.png)
+- [circle trace residual norm](cycle_moment_outputs/circle_h_norm.png)
+- [scheduled final assignment](cycle_moment_outputs/circle_scheduled_assignment_perm.png)
+- [fixed final assignment](cycle_moment_outputs/circle_fixed_assignment_perm.png)
+- [circle trace residual components, scheduled](cycle_moment_outputs/circle_rho_up___tau_down_h_components.png)
+- [circle trace residual components, fixed](cycle_moment_outputs/circle_fixed_rho_tau_h_components.png)
+- [circle entropy](cycle_moment_outputs/circle_entropy.png)
+- [circle sharpness](cycle_moment_outputs/circle_sharpness.png)
 
+### 12.2 Two-cluster subtour pressure
 
+The two-cluster instance is designed so that the cheap assignment structure is a pair of within-cluster subtours. This stresses the trace constraints because the cost term favours a cycle cover rather than a single Hamiltonian cycle.
 
-### 12.5 Reduced-cost stability near tours
+Observed behaviour:
 
+- small \(\rho\): cheap subtour covers such as \([4,4]\);
+- moderate \(\rho\): transition to a single \(8\)-cycle;
+- very large \(\rho\): trace residuals are small, but the selected single cycle can be unnecessarily expensive.
 
+This supports the interpretation of \(\rho\) as a Hamiltonicity pressure. It also shows that excessive pressure can enforce validity before the cost landscape has selected a good tour.
 
-### 12.6 Annealing and penalty continuation
+Key files:
 
+- [two-cluster trace residual norm](cycle_moment_outputs/two_cluster_h_norm.png)
+- [two-cluster cost](cycle_moment_outputs/two_cluster_cost.png)
+- [two-cluster entropy](cycle_moment_outputs/two_cluster_entropy.png)
+- [two-cluster sharpness](cycle_moment_outputs/two_cluster_sharpness.png)
+- [scheduled assignment, remains two subtours](cycle_moment_outputs/two_cluster_scheduled_assignment_perm.png)
+- [small-rho assignment, two subtours](cycle_moment_outputs/two_cluster_small_assignment_perm.png)
+- [large-rho assignment, single cycle](cycle_moment_outputs/two_cluster_large_assignment_perm.png)
+- [small-rho trace residual components](cycle_moment_outputs/two_cluster_fixed_small_rho_h_components.png)
+- [large-rho trace residual components](cycle_moment_outputs/two_cluster_fixed_large_rho_h_components.png)
+- [scheduled trace residual components](cycle_moment_outputs/two_cluster_rho_up___tau_down_h_components.png)
 
+### 12.3 Rho-pressure sweep
+
+The fixed-\(\rho\) sweep makes the Hamiltonicity-pressure transition explicit. For each \(\rho\), the optimiser is run on the two-cluster instance and the final matrix is projected to a permutation by exact assignment projection,
+
+\[
+\pi^*=\arg\max_\pi \sum_i P_{i,\pi(i)}.
+\]
+
+The aggregate plots show median behaviour and interquartile ranges across seeds. The most important curve is the probability that the projected assignment is a single cycle.
+
+The observed qualitative picture is:
+
+\[
+\rho\text{ low}\Rightarrow\text{subtour cover},
+\]
+
+\[
+\rho\text{ intermediate}\Rightarrow\text{single cycle with moderate cost},
+\]
+
+\[
+\rho\text{ high}\Rightarrow\text{single cycle but possibly poor route}.
+\]
+
+Key files:
+
+- [single-cycle probability](cycle_moment_outputs/two_cluster_rho_pressure_single_cycle_probability.png)
+- [final trace residual norm](cycle_moment_outputs/two_cluster_rho_pressure_h_norm_aggregate.png)
+- [assignment-projected cost](cycle_moment_outputs/two_cluster_rho_pressure_assignment_cost_aggregate.png)
+- [relaxed cost](cycle_moment_outputs/two_cluster_rho_pressure_relaxed_cost_aggregate.png)
+- [entropy](cycle_moment_outputs/two_cluster_rho_pressure_entropy_aggregate.png)
+- [sharpness](cycle_moment_outputs/two_cluster_rho_pressure_sharpness_aggregate.png)
+- [rho-pressure summary CSV](cycle_moment_outputs/two_cluster_rho_pressure_summary.csv)
+
+The key empirical observation is a sharp transition: increasing \(\rho\) collapses trace residuals and turns cheap subtour covers into single-cycle assignments, but the assignment-projected cost rises sharply once Hamiltonicity is forced.
+
+### 12.4 Rho/tau phase diagram
+
+The two-parameter phase diagram varies both trace pressure \(\rho\) and Sinkhorn temperature \(\tau\). It shows regions corresponding to:
+
+- soft/fractional matrices;
+- cheap subtour covers;
+- useful single-cycle solutions;
+- brittle high-pressure/high-sharpness solutions.
+
+In the two-cluster example, \(\rho\) controls most of the transition from subtours to single cycles, while \(\tau\) mainly controls entropy and row sharpness. High temperatures require larger trace pressure to force single cycles; low temperatures sharpen assignments but can freeze a subtour structure if trace pressure is insufficient.
+
+Key files:
+
+- [phase diagram: single-cycle indicator](cycle_moment_outputs/two_cluster_phase_assignment_single_cycle.png)
+- [phase diagram: trace residual norm](cycle_moment_outputs/two_cluster_phase_h_norm.png)
+- [phase diagram: assignment-projected cost](cycle_moment_outputs/two_cluster_phase_assignment_cost.png)
+- [phase diagram: entropy](cycle_moment_outputs/two_cluster_phase_entropy.png)
+- [phase diagram: sharpness](cycle_moment_outputs/two_cluster_phase_sharpness.png)
+- [phase diagram summary CSV](cycle_moment_outputs/two_cluster_phase_diagram_summary.csv)
+
+This experiment motivates a staged stabilisation rule: avoid lowering \(\tau\) so early that subtours freeze before the trace pressure has enough leverage.
+
+### 12.5 Uniform initialisation degeneracy
+
+At the uniform doubly stochastic point
+
+\[
+P_0=\frac{1}{n}\mathbf 1\mathbf 1^\top,
+\]
+
+we have \(P_0^k=P_0\) for \(k\ge1\). For Birkhoff-tangent perturbations \(\delta P\),
+
+\[
+D\operatorname{tr}(P^k)[\delta P]
+= k\operatorname{tr}(P_0\delta P)
+= \frac{k}{n}\sum_{ij}\delta P_{ij}=0,
+\qquad k\ge2.
+\]
+
+With diagonal/self-loops masked, the remaining \(k=1\) trace signal is also removed. The numerical diagnostic confirms that the trace-penalty gradient is essentially zero at exact uniform initialisation and grows only after symmetry-breaking logit perturbations.
+
+Key files:
+
+- [uniform initialisation degeneracy diagnostic](cycle_moment_outputs/uniform_degeneracy_grad_norm.png)
+- [ambient trace-Jacobian singular values](cycle_moment_outputs/uniform_ambient_trace_jacobian_singular_values.txt)
+
+The practical implication is simple: do not initialise exactly at uniform logits for no-self-loop trace-constrained routing.
+
+### 12.6 Linearised primal-dual ringing and augmented damping
+
+Around a frozen Sinkhorn point, let \(A=Dh(X)\) be the trace-moment Jacobian with respect to logits. The small-signal primal-dual model is
+
+\[
+\dot z=-A^\top\lambda-\rho A^\top A z,
+\]
+
+\[
+\dot\lambda=\eta A z.
+\]
+
+Along a singular mode of \(A\) with singular value \(\sigma\), the trace-visible scalar mode obeys
+
+\[
+\ddot q + \rho\sigma^2\dot q + \eta\sigma^2 q=0.
+\]
+
+Thus \(\rho=0\) gives an undamped oscillator, while \(\rho>0\) gives a damped oscillator. The numerical demo normalises by the top singular value so that the ringing is visible on a fixed time axis.
+
+Key files:
+
+- [linearised top-mode ringing and damping](cycle_moment_outputs/ringing_linear_top_mode.png)
+- [linear trace residual norm](cycle_moment_outputs/ringing_linear_h_norm.png)
+- [linear pure trace components](cycle_moment_outputs/ringing_linear_pure_rho0_linear_h_components.png)
+- [linear damped trace components](cycle_moment_outputs/ringing_linear_damped_zeta0.22_linear_h_components.png)
+- [trace-Jacobian singular spectrum](cycle_moment_outputs/ringing_trace_jacobian_spectrum.png)
+- [linear ringing scaling parameters](cycle_moment_outputs/ringing_linear_scaling.txt)
+
+This is the cleanest numerical confirmation of the linearised stability analysis.
+
+### 12.7 Nonlinear primal-dual snapping
+
+The full nonlinear Sinkhorn/logit primal-dual system does not always show smooth sinusoidal ringing. In the experiments it can instead sit at high trace residual for many steps, accumulate dual pressure, and then abruptly collapse to a sharp support. This is a nonlinear analogue of the same lack of damping: the trace-control energy is not dissipated smoothly until support hardening occurs.
+
+Key files:
+
+- [nonlinear trace residual norm](cycle_moment_outputs/ringing_h_norm.png)
+- [pure primal-dual trace components](cycle_moment_outputs/ringing_pure_primal-dual_rho=0_h_components.png)
+- [soft-temperature primal-dual trace components](cycle_moment_outputs/ringing_pure_primal-dual_soft_tau=4_h_components.png)
+- [augmented trace components](cycle_moment_outputs/ringing_augmented_rho=25_h_components.png)
+- [nonlinear entropy](cycle_moment_outputs/ringing_entropy.png)
+- [nonlinear sharpness](cycle_moment_outputs/ringing_sharpness.png)
+- [nonlinear relaxed cost](cycle_moment_outputs/ringing_cost.png)
+
+The augmented run removes most of this delayed-collapse behaviour by damping trace-visible modes directly.
+
+### 12.8 Summary of numerical evidence
+
+The experiments support the stability analysis rather than a solver-performance claim:
+
+1. continuation can recover an obvious geometric tour;
+2. fixed trace pressure can produce valid but poor tours;
+3. clustered instances reveal cheap subtour attractors;
+4. increasing \(\rho\) causes a sharp transition from subtours to single cycles;
+5. exact uniform initialisation is first-order degenerate under no-self-loop trace constraints;
+6. the linearised primal-dual trace modes ring without augmentation;
+7. augmented penalties damp the trace-visible modes.
+
+The resulting practical recipe is:
+
+\[
+\text{small random logits},
+\qquad
+\rho\uparrow\text{ carefully},
+\qquad
+\tau\downarrow\text{ only after trace residuals respond}.
+\]
 
 ## 13. Relevance Beyond TSP
 
@@ -583,7 +771,7 @@ The analogy with Brockett's double-bracket flow is structural rather than litera
 Classical Brockett-style flows:
 
 \[
-\text{orthogonal/isopectral geometry}
+\text{orthogonal/isospectral geometry}
 \]
 
 \[
@@ -616,7 +804,7 @@ A concise description is:
 
 ## 15. Open Questions
 
-1. Do the trace-power constraints exactly characterise single Hamiltonian cycles over the Birkhoff polytope under suitable nonnegativity and no-self-loop assumptions?
+1. Give a clean self-contained proof/citation that the trace-power constraints characterise single Hamiltonian cycles over the Birkhoff polytope under nonnegativity and no-self-loop assumptions.
 2. What is the exact rank of the trace-constraint Jacobian at symmetric points?
 3. How severe is the first-order degeneracy near uniform initialisation in practical finite-temperature Sinkhorn optimisation?
 4. Can the spectrum of \(A M A^\top\) be used to adaptively tune augmentation strength \(\rho\)?
