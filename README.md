@@ -6,31 +6,31 @@ The project is **not** intended as a competitive TSP solver. The aim is to under
 
 ## Core idea
 
-A directed tour can be represented by a permutation matrix. A Hamiltonian tour is a permutation consisting of a single \(n\)-cycle. Over the Birkhoff polytope,
+A directed tour can be represented by a permutation matrix. A Hamiltonian tour is a permutation consisting of a single $n$-cycle. Over the Birkhoff polytope,
 
-\[
+$$
 \mathcal B_n=\{P\ge 0:P\mathbf 1=\mathbf 1,\;P^\top\mathbf 1=\mathbf 1\},
-\]
+$$
 
 trace powers detect weighted closed walks:
 
-\[
+$$
 h_k(P)=\operatorname{tr}(P^k)-b_k.
-\]
+$$
 
 For Hamiltonian-cycle constraints we use
 
-\[
+$$
 b_k=0\quad (1\le k<n),\qquad b_n=n.
-\]
+$$
 
-The flow uses KL/Sinkhorn geometry rather than Euclidean projection. Given an energy \(E(P)\) with Euclidean gradient \(G=\nabla_P E(P)\), the Birkhoff-preserving KL-gradient flow has coordinate form
+The flow uses KL/Sinkhorn geometry rather than Euclidean projection. Given an energy $E(P)$ with Euclidean gradient $G=\nabla_P E(P)$, the Birkhoff-preserving KL-gradient flow has coordinate form
 
-\[
+$$
 \dot P_{ij}=-P_{ij}(G_{ij}-a_i-b_j),
-\]
+$$
 
-where \(a,b\) are row/column potentials chosen to preserve the marginal constraints. The multiplicative form preserves positivity and gives a transport-polytope analogue of Brockett-style constrained matrix flows.
+where $a,b$ are row/column potentials chosen to preserve the marginal constraints. The multiplicative form preserves positivity and gives a transport-polytope analogue of Brockett-style constrained matrix flows.
 
 ## Repository layout
 
@@ -80,7 +80,7 @@ On points arranged on a circle, a continuation schedule with increasing trace pr
 
 ### 2. Two-cluster subtour pressure
 
-A two-cluster instance exposes the subtour failure mode. Low trace pressure favours cheap within-cluster cycle covers such as \([4,4]\); sufficiently large trace pressure forces a single 8-cycle, often at higher assignment cost.
+A two-cluster instance exposes the subtour failure mode. Low trace pressure favours cheap within-cluster cycle covers such as $[4,4]$; sufficiently large trace pressure forces a single 8-cycle, often at higher assignment cost.
 
 - [scheduled assignment: two subtours](cycle_moment_outputs/two_cluster_scheduled_assignment_perm.png)
 - [small-rho assignment: two subtours](cycle_moment_outputs/two_cluster_small_assignment_perm.png)
@@ -89,7 +89,7 @@ A two-cluster instance exposes the subtour failure mode. Low trace pressure favo
 
 ### 3. Rho-pressure transition
 
-Sweeping fixed \(\rho\) reveals a sharp transition from subtour covers to single-cycle assignments.
+Sweeping fixed $\rho$ reveals a sharp transition from subtour covers to single-cycle assignments.
 
 - [single-cycle probability](cycle_moment_outputs/two_cluster_rho_pressure_single_cycle_probability.png)
 - [final trace residual norm](cycle_moment_outputs/two_cluster_rho_pressure_h_norm_aggregate.png)
@@ -100,7 +100,7 @@ Sweeping fixed \(\rho\) reveals a sharp transition from subtour covers to single
 
 ### 4. Rho/tau phase diagram
 
-The phase diagram shows that \(\rho\) mostly controls the subtour-to-Hamiltonian transition, while \(\tau\) controls entropy and assignment sharpness.
+The phase diagram shows that $\rho$ mostly controls the subtour-to-Hamiltonian transition, while $\tau$ controls entropy and assignment sharpness.
 
 - [single-cycle phase diagram](cycle_moment_outputs/two_cluster_phase_assignment_single_cycle.png)
 - [trace residual phase diagram](cycle_moment_outputs/two_cluster_phase_h_norm.png)
@@ -111,18 +111,18 @@ The phase diagram shows that \(\rho\) mostly controls the subtour-to-Hamiltonian
 
 ### 5. Uniform initialisation degeneracy
 
-At the uniform doubly stochastic point, all trace powers with \(k\ge2\) are first-order invisible on the Birkhoff tangent space. With the diagonal/no-self-loop direction removed, the trace penalty is first-order silent at exact uniform initialisation.
+At the uniform doubly stochastic point, all trace powers with $k\ge2$ are first-order invisible on the Birkhoff tangent space. With the diagonal/no-self-loop direction removed, the trace penalty is first-order silent at exact uniform initialisation.
 
 - [uniform initialisation degeneracy diagnostic](cycle_moment_outputs/uniform_degeneracy_grad_norm.png)
 - [ambient trace-Jacobian singular values](cycle_moment_outputs/uniform_ambient_trace_jacobian_singular_values.txt)
 
 ### 6. Linearised ringing and augmented damping
 
-The local primal-dual trace-mode model gives an undamped oscillator when \(\rho=0\) and a damped oscillator when \(\rho>0\):
+The local primal-dual trace-mode model gives an undamped oscillator when $\rho=0$ and a damped oscillator when $\rho>0$:
 
-\[
+$$
 \ddot q+\rho\sigma^2\dot q+\eta\sigma^2q=0.
-\]
+$$
 
 - [linearised top-mode ringing and damping](cycle_moment_outputs/ringing_linear_top_mode.png)
 - [trace-Jacobian singular spectrum](cycle_moment_outputs/ringing_trace_jacobian_spectrum.png)
@@ -172,3 +172,12 @@ The main supported claims are diagnostic rather than solver-performance claims:
 ## Reference trail
 
 The draft bibliography currently includes references for Brockett flow, trace acyclicity, trace-guided ATSP relaxations, Sinkhorn/mirror-flow methods, assignment-polytope geometry, and reduced costs/linear programming. The metadata should still be checked before any public preprint-style release.
+
+
+## Acknowledgements
+
+This project grew out of a collaborative exploration between Paul Bellette and ChatGPT.
+
+Paul drove the research direction, experimental setup, and interpretation. ChatGPT contributed derivations, prototype code, experiment design suggestions, and documentation drafting.
+
+The project is part of series of work in open research notes with LLM assistance
