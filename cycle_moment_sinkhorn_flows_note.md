@@ -495,7 +495,7 @@ P=\operatorname{Sinkhorn}\left(\exp(X/\tau)\right).
 Then optimise
 
 \[
-E_{\rho,\tau}(X)=\langle C,P\rangle+rac{\rho}{2}\sum_{k=1}^n h_k(P)^2.
+E_{\rho,\tau}(X)=\langle C,P\rangle+frac{\rho}{2}\sum_{k=1}^n h_k(P)^2.
 \]
 
 The stability analysis suggests:
@@ -583,7 +583,7 @@ The analogy with Brockett's double-bracket flow is structural rather than litera
 Classical Brockett-style flows:
 
 \[
-\text{orthogonal/ispectral geometry}
+\text{orthogonal/isopectral geometry}
 \]
 
 \[

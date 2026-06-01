@@ -1,0 +1,2 @@
+linear pure rho=0: sigma1=0.011140107, eta=2209.116, rho=0, dt=0.02
+linear damped zeta=0.22: sigma1=0.011140107, eta=2209.116, rho=1856.4043, dt=0.02
