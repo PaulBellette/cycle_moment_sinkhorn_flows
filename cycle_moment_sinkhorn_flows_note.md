@@ -68,6 +68,50 @@ b_n=n.
 
 The constraints \(\operatorname{tr}(P^k)=0\) for \(k<n\) suppress shorter closed cycles, while \(\operatorname{tr}(P^n)=n\) is consistent with a single \(n\)-cycle permutation.
 
+### Lemma: trace moments characterise Hamiltonian cycles
+
+Let \(P\in\mathcal B_n\). Then \(P\) is the permutation matrix of a single directed \(n\)-cycle if and only if
+
+\[
+\operatorname{tr}(P^k)=0,\qquad k=1,\dots,n-1.
+\]
+
+In that case, automatically \(\operatorname{tr}(P^n)=n\).
+
+Proof. If \(P\) is a single \(n\)-cycle permutation matrix, then \(P^k\) has no fixed points for \(1\le k<n\). Hence \(\operatorname{tr}(P^k)=0\).
+
+Conversely, suppose \(P\in\mathcal B_n\) and \(\operatorname{tr}(P^k)=0\) for \(1\le k<n\). Since \(P\ge0\),
+
+\[
+\operatorname{tr}(P^k)
+=
+\sum_{i_1,\dots,i_k}
+P_{i_1i_2}P_{i_2i_3}\cdots P_{i_ki_1}.
+\]
+
+Every term is nonnegative. Therefore \(\operatorname{tr}(P^k)=0\) implies there is no positive-weight closed walk of length \(k\).
+
+By the Birkhoff-von Neumann theorem,
+
+\[
+P=\sum_\ell \alpha_\ell \Pi_\ell,
+\qquad
+\alpha_\ell>0,\quad
+\sum_\ell\alpha_\ell=1,
+\]
+
+where each \(\Pi_\ell\) is a permutation matrix. If any \(\Pi_\ell\) contained a cycle of length \(m<n\), then that cycle would give a positive term in \(\operatorname{tr}(P^m)\), contradiction. Hence each \(\Pi_\ell\) is a single \(n\)-cycle.
+
+It remains to show that all \(\Pi_\ell\) are the same \(n\)-cycle. Suppose two distinct \(n\)-cycles occur in the decomposition. Relabel the vertices so that one of them is
+
+\[
+1\to2\to\cdots\to n\to1.
+\]
+
+The other cycle has some edge \(i\to j\) with \(j\ne i+1\) modulo \(n\). Combining this edge with the path in the first cycle from \(j\) back to \(i\) gives a directed cycle of length strictly less than \(n\) in the support of \(P\). This would again make \(\operatorname{tr}(P^m)>0\) for some \(m<n\), contradiction.
+
+Therefore all permutation matrices in the Birkhoff decomposition are the same \(n\)-cycle, and \(P\) equals that permutation matrix. Finally, for an \(n\)-cycle permutation, \(P^n=I\), so \(\operatorname{tr}(P^n)=n\).
+
 ### Remark: why Birkhoff rather than orthogonal?
 
 On an orthogonal or isospectral manifold, trace-power constraints mostly constrain eigenvalues and leave a large continuous orbit. On the nonnegative stochastic/Birkhoff side, trace powers have a direct closed-walk interpretation. This makes the trace constraints substantially more combinatorial.
@@ -130,12 +174,154 @@ r\\c
 
 There is a gauge freedom \(a\mapsto a+\gamma\mathbf 1\), \(b\mapsto b-\gamma\mathbf 1\), which can be fixed by imposing, for example, \(\mathbf 1^\top a=0\).
 
-### TODO proof sketch
+### Proposition/proof plan: Birkhoff-preserving KL projection
 
-- Show that the coordinate flow preserves strict positivity.
-- Show that the chosen \(a,b\) preserve row and column sums.
-- Identify the flow as the KL/natural-gradient projection of \(G\) onto the Birkhoff tangent space.
-- State precisely the metric/operator \(M_P\) induced by the KL geometry.
+We want to justify three related facts about this coordinate form.
+
+First, the tangent space of the Birkhoff interior is the set of matrices whose row and column sums vanish. This follows by differentiating the constraints \(P(t)\mathbf 1 = \mathbf 1\) and \(P(t)^\top\mathbf 1 = \mathbf 1\). So any feasible velocity \(V\) must satisfy
+
+\[
+V\mathbf 1=0,\qquad V^\top\mathbf 1=0.
+\]
+
+Second, the KL/Fisher metric on positive matrices is
+
+\[
+\langle U,V\rangle_P
+=
+\sum_{ij}\frac{U_{ij}V_{ij}}{P_{ij}}.
+\]
+
+With no row/column constraints, the KL-gradient of an energy \(E\) with Euclidean gradient \(G\) is \(P\odot G\), because
+
+\[
+DE(P)[V]=\sum_{ij}G_{ij}V_{ij}
+\]
+
+must equal
+
+\[
+\langle P\odot G,V\rangle_P
+=
+\sum_{ij}\frac{P_{ij}G_{ij}V_{ij}}{P_{ij}}
+=
+\sum_{ij}G_{ij}V_{ij}.
+\]
+
+Thus unconstrained KL-gradient descent has the multiplicative form
+
+\[
+\dot P_{ij}=-P_{ij}G_{ij}.
+\]
+
+Third, the Birkhoff constraints are enforced by subtracting additive row and column potentials before multiplying by \(P\). Set
+
+\[
+V_{ij}=-P_{ij}(G_{ij}-a_i-b_j).
+\]
+
+Row preservation gives
+
+\[
+0=\sum_jV_{ij}
+=
+-\sum_jP_{ij}G_{ij}
++a_i
++\sum_jP_{ij}b_j.
+\]
+
+Writing
+
+\[
+r_i=\sum_jP_{ij}G_{ij},
+\]
+
+this is
+
+\[
+a+Pb=r.
+\]
+
+Similarly, column preservation gives
+
+\[
+P^\top a+b=c,
+\]
+
+where
+
+\[
+c_j=\sum_iP_{ij}G_{ij}.
+\]
+
+This is the block system above. It is singular only because the velocity depends on \(a_i+b_j\), so the transformation
+
+\[
+a\mapsto a+\gamma\mathbf 1,
+\qquad
+b\mapsto b-\gamma\mathbf 1
+\]
+
+changes the potentials but not the flow. A gauge such as \(\sum_i a_i=0\) fixes this.
+
+To verify that this is the KL-projected gradient, define
+
+\[
+W_{ij}=P_{ij}(G_{ij}-a_i-b_j).
+\]
+
+For any tangent direction \(V\),
+
+\[
+\langle W,V\rangle_P
+=
+\sum_{ij}(G_{ij}-a_i-b_j)V_{ij}.
+\]
+
+Expanding,
+
+\[
+\langle W,V\rangle_P
+=
+\sum_{ij}G_{ij}V_{ij}
+-
+\sum_i a_i\sum_jV_{ij}
+-
+\sum_j b_j\sum_iV_{ij}.
+\]
+
+The last two terms vanish because \(V\) has zero row and column sums. Therefore
+
+\[
+\langle W,V\rangle_P
+=
+DE(P)[V]
+\]
+
+for every tangent direction \(V\). This is exactly the defining property of the KL-gradient restricted to the Birkhoff tangent space.
+
+Finally, strict positivity follows directly from the multiplicative form. Each entry satisfies
+
+\[
+\dot P_{ij}=P_{ij}R_{ij}(t),
+\]
+
+where
+
+\[
+R_{ij}(t)=-(G_{ij}-a_i-b_j).
+\]
+
+Therefore
+
+\[
+P_{ij}(t)
+=
+P_{ij}(0)
+\exp\left(\int_0^t R_{ij}(s)\,ds\right).
+\]
+
+Thus positive entries remain positive while the solution exists and the vector field remains finite.
 
 ## 4. Cycle-Moment Sinkhorn Flow
 
@@ -256,11 +442,77 @@ k\sum_{r=0}^{k-2}\operatorname{tr}\left(P^r\delta P P^{k-2-r}\delta P\right).
 
 Thus the local curvature of the trace-constrained Lagrangian is generated entirely by the trace-moment terms; the cost \(\langle C,P\rangle\) is linear and contributes no Hessian.
 
-### TODO proof sketch
+### Proof
 
-- Derive the first derivative using cyclicity of trace.
-- Derive the second variation carefully for noncommuting perturbations.
-- Express the Hessian as a linear operator on the Birkhoff tangent space.
+Let \(f_k(P)=\operatorname{tr}(P^k)\). Expanding to first order,
+
+\[
+(P+\epsilon \delta P)^k
+=
+P^k
++
+\epsilon\sum_{r=0}^{k-1}P^r\delta P P^{k-1-r}
++
+O(\epsilon^2).
+\]
+
+Taking traces gives
+
+\[
+\operatorname{tr}\left((P+\epsilon\delta P)^k\right)
+=
+\operatorname{tr}(P^k)
++
+\epsilon
+\sum_{r=0}^{k-1}
+\operatorname{tr}(P^r\delta P P^{k-1-r})
++
+O(\epsilon^2).
+\]
+
+By cyclicity of trace,
+
+\[
+\operatorname{tr}(P^r\delta P P^{k-1-r})
+=
+\operatorname{tr}(P^{k-1}\delta P).
+\]
+
+Thus
+
+\[
+Df_k(P)[\delta P]
+=
+k\operatorname{tr}(P^{k-1}\delta P).
+\]
+
+Using the Euclidean matrix inner product
+\(\langle A,B\rangle=\operatorname{tr}(A^\top B)\), this implies
+
+\[
+\nabla_P f_k(P)=k(P^{k-1})^\top.
+\]
+
+For the second variation, differentiate the first variation. Since
+
+\[
+D(P^{k-1})[\delta P]
+=
+\sum_{r=0}^{k-2}P^r\delta P P^{k-2-r},
+\]
+
+we obtain
+
+\[
+D^2 f_k(P)[\delta P,\delta P]
+=
+k\sum_{r=0}^{k-2}
+\operatorname{tr}\left(
+P^r\delta P P^{k-2-r}\delta P
+\right).
+\]
+
+Since \(h_k(P)=f_k(P)-b_k\), the same derivatives hold for \(h_k\).
 
 ## 7. Lyapunov Structure
 
@@ -288,12 +540,96 @@ Thus the penalty flow is Lyapunov stable in the sense of monotone energy descent
 
 The pure primal-dual system, by contrast, has saddle-like structure and can exhibit oscillatory constraint modes.
 
-### TODO proof sketch
+### Proof
 
-- Define the precise KL metric on \(T_P\mathcal B\).
-- Show that the coordinate expression for \(\dot P\) is the negative KL gradient.
-- Prove the energy dissipation identity.
-- Contrast with primal-dual dynamics by differentiating the linearised constraint residuals.
+Let \(E(P)\) be any smooth energy and let
+
+\[
+W=\operatorname{grad}^{\mathrm{KL}}_{\mathcal B}E(P).
+\]
+
+The KL-gradient flow is
+
+\[
+\dot P=-W.
+\]
+
+By the chain rule,
+
+\[
+\frac{dE}{dt}=DE(P)[\dot P].
+\]
+
+Using the defining property of the KL-gradient,
+
+\[
+DE(P)[V]=\langle W,V\rangle_P
+\]
+
+for every tangent direction \(V\). Taking \(V=\dot P=-W\), we obtain
+
+\[
+\frac{dE}{dt}
+=
+\langle W,-W\rangle_P
+=
+-\|W\|_P^2
+\le0.
+\]
+
+In coordinates,
+
+\[
+W_{ij}=P_{ij}(G_{ij}-a_i-b_j),
+\]
+
+so
+
+\[
+\|W\|_P^2
+=
+\sum_{ij}\frac{W_{ij}^2}{P_{ij}}
+=
+\sum_{ij}P_{ij}(G_{ij}-a_i-b_j)^2.
+\]
+
+Therefore
+
+\[
+\frac{dE}{dt}
+=
+-\sum_{ij}P_{ij}(G_{ij}-a_i-b_j)^2.
+\]
+
+For \(E=E_\rho\), this proves the stated Lyapunov dissipation identity.
+
+The pure primal-dual flow does not satisfy the same identity for the Lagrangian. If
+
+\[
+\mathcal L(P,\lambda)=\langle C,P\rangle+\lambda^\top h(P),
+\]
+
+then
+
+\[
+\frac{d\mathcal L}{dt}
+=
+D_P\mathcal L[\dot P]+h(P)^\top\dot\lambda.
+\]
+
+The first term is nonpositive under KL-gradient descent in \(P\), but with
+
+\[
+\dot\lambda=\eta h(P),
+\]
+
+the second term is
+
+\[
+\eta\|h(P)\|^2\ge0.
+\]
+
+Thus the primal-dual system is not simply a dissipative gradient flow of \(\mathcal L\), which is consistent with the oscillatory modes seen in the linearised analysis.
 
 ## 8. Linearisation Around Interior Stationary Points
 
@@ -383,13 +719,141 @@ while
 \text{cost and reduced-cost structure select optimality among valid cycles.}
 \]
 
-### TODO proof sketch
+### Local trace-mode model: ringing and damping
 
-- Define \(M_*\) rigorously on the Birkhoff tangent space.
-- Derive the block Jacobian for primal-dual flow.
-- Derive the augmented block Jacobian.
-- State the mode decomposition in metric-aware form.
-- Prove the damping estimate for trace-violating perturbations.
+The full nonlinear Sinkhorn/logit dynamics can snap, saturate, or change support. The following calculation should therefore be read as a local normal-form model for the trace-visible modes near an interior stationary point, not as a complete global convergence theorem.
+
+Let \(z\) denote local coordinates for perturbations in the Birkhoff tangent space, and linearise the trace constraints as
+
+\[
+h(P_*+z)\approx A z,
+\]
+
+where \(A=Dh(P_*)\) is the trace-constraint Jacobian in these local coordinates. Ignoring cost curvature for the moment, the pure primal-dual trace dynamics has the local form
+
+\[
+\dot z=-A^\top\lambda,
+\]
+
+\[
+\dot\lambda=\eta A z.
+\]
+
+Differentiating the second equation gives
+
+\[
+\ddot\lambda
+=
+\eta A\dot z
+=
+-\eta A A^\top\lambda.
+\]
+
+Thus the trace-control subsystem has undamped oscillatory modes. Equivalently, let
+
+\[
+A v_i=\sigma_i u_i
+\]
+
+be a singular mode of \(A\), and write
+
+\[
+z=qv_i,
+\qquad
+\lambda=pu_i.
+\]
+
+Then
+
+\[
+\dot q=-\sigma_i p,
+\]
+
+\[
+\dot p=\eta\sigma_i q.
+\]
+
+Hence
+
+\[
+\ddot q=-\eta\sigma_i^2 q,
+\]
+
+or
+
+\[
+\ddot q+\eta\sigma_i^2 q=0.
+\]
+
+This is the linearised ringing mechanism.
+
+For the augmented primal-dual system, the local augmented term is
+
+\[
+\frac{\rho}{2}\|Az\|^2,
+\]
+
+whose gradient is
+
+\[
+\rho A^\top A z.
+\]
+
+The local model becomes
+
+\[
+\dot z=-A^\top\lambda-\rho A^\top A z,
+\]
+
+\[
+\dot\lambda=\eta A z.
+\]
+
+In the same singular mode,
+
+\[
+\dot q=-\sigma_i p-\rho\sigma_i^2 q,
+\]
+
+\[
+\dot p=\eta\sigma_i q.
+\]
+
+Differentiating the \(q\)-equation gives
+
+\[
+\ddot q
+=
+-\sigma_i\dot p-\rho\sigma_i^2\dot q
+=
+-\eta\sigma_i^2q-\rho\sigma_i^2\dot q.
+\]
+
+Therefore
+
+\[
+\ddot q+\rho\sigma_i^2\dot q+\eta\sigma_i^2q=0.
+\]
+
+So the augmentation adds a damping coefficient \(\rho\sigma_i^2\) in each trace-visible singular mode.
+
+Including cost/Lagrangian curvature gives the more general local model
+
+\[
+\dot z=-H z-A^\top\lambda-\rho A^\top A z,
+\]
+
+\[
+\dot\lambda=\eta A z.
+\]
+
+The curvature term \(H\) can shift frequencies and add local decay or growth depending on the constrained Hessian. However, the trace-augmentation contribution remains the positive semidefinite damping/stiffness term
+
+\[
+\rho A^\top A.
+\]
+
+This is the mechanism isolated in the linearised ringing experiment. In the full nonlinear Sinkhorn parameterisation the same undamped trace-control structure may appear not as a clean sinusoid, but as delayed high-residual plateaus followed by sharp support changes.
 
 ## 9. Degeneracy at the Uniform Doubly Stochastic Point
 
